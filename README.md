@@ -2,12 +2,19 @@
 
 [![License](https://img.shields.io/badge/license-Apache%20v2.0-blue.svg)](LICENSE)
 [![Build Status](https://travis-ci.org/Mainflux/mainflux-core-server.svg?branch=master)](https://travis-ci.org/Mainflux/mainflux-core-server)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Mainflux/mainflux-core-server)](https://goreportcard.com/report/github.com/Mainflux/mainflux-core-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Mainflux/mainflux-lite)](https://goreportcard.com/report/github.com/Mainflux/mainflux-lite)
 [![Join the chat at https://gitter.im/Mainflux/mainflux](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Mainflux/mainflux?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Mainflux Core Microservice for Mainflux IoT Platform.
+Mainflux Lite is the compact and simple single binary (monolith) server with Mainflux IoT functionalities.
+
+It is very useful for development, prototyping and quick and simple deployments - in situation where full-blown Mainflux system (based on plethora of microservices) is not needed.
 
 ### Installation
+#### TL;DR
+```bash
+go get github.com/mainflux/mainflux-lite
+$GOBIN/mainflux-lite
+```
 #### Docker
 ```bash
 # Influx prerequisite
@@ -21,6 +28,7 @@ docker pull mainflux/mainflux-lite
 docker run --name mainflux-lite -p 7070:7070 --link=mongo:mongo --link=influx:influx \
         -it mainflux/mainflux-lite
 ```
+
 #### Code
 ##### Prerequisite
 If not set already, please set your `GOPATH` and `GOBIN` environment variables. For example:

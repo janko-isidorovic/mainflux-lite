@@ -1,4 +1,4 @@
-# Mainflux Core Server
+# Mainflux Lite
 
 [![License](https://img.shields.io/badge/license-Apache%20v2.0-blue.svg)](LICENSE)
 [![Build Status](https://travis-ci.org/Mainflux/mainflux-core-server.svg?branch=master)](https://travis-ci.org/Mainflux/mainflux-core-server)

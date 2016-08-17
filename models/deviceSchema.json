@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "default": "AAAA"
+    },
+    "name": {
+      "type": "string",
+      "default": "Test"
+    },
+    "blah": {
+      "type": "string",
+      "default": "nesto"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "blah"
+  ]
+}

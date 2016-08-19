@@ -8,45 +8,44 @@
 
 package db
 
-import(
-    "log"
-    "strconv"
-    "github.com/influxdata/influxdb/client/v2"
+import (
+	"github.com/influxdata/influxdb/client/v2"
+	"log"
+	"strconv"
 )
 
 type InfluxConn struct {
-    C client.Client
-    Bp client.BatchPoints
+	C  client.Client
+	Bp client.BatchPoints
 }
 
 var IfxConn InfluxConn
 
 func InitInflux(host string, port int, db string) error {
-    // Make client
-    icc, err := client.NewHTTPClient(client.HTTPConfig{
-        Addr: "http://" + host + ":" + strconv.Itoa(port),
-        //Username: username,
-        //Password: password,
-    })
+	// Make client
+	icc, err := client.NewHTTPClient(client.HTTPConfig{
+		Addr: "http://" + host + ":" + strconv.Itoa(port),
+		//Username: username,
+		//Password: password,
+	})
 
-    if err != nil {
-        log.Fatalln("Error: ", err)
-    }
+	if err != nil {
+		log.Fatalln("Error: ", err)
+	}
 
+	IfxConn.C = icc
 
-    IfxConn.C = icc
+	// Create a new point batch
+	icbp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  db,
+		Precision: "s",
+	})
 
-    // Create a new point batch
-    icbp, err := client.NewBatchPoints(client.BatchPointsConfig{
-        Database:  db,
-        Precision: "s",
-    })
+	if err != nil {
+		log.Fatalln("Error: ", err)
+	}
 
-    if err != nil {
-        log.Fatalln("Error: ", err)
-    }
+	IfxConn.Bp = icbp
 
-    IfxConn.Bp = icbp
-
-    return err
+	return err
 }

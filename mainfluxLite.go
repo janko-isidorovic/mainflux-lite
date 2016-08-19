@@ -9,74 +9,72 @@
 package main
 
 import (
-    "strconv"
+	"strconv"
 
-    "github.com/mainflux/mainflux-lite/routes"
-    "github.com/mainflux/mainflux-lite/config"
-    "github.com/mainflux/mainflux-lite/db"
+	"github.com/mainflux/mainflux-lite/config"
+	"github.com/mainflux/mainflux-lite/db"
+	"github.com/mainflux/mainflux-lite/routes"
 
-    "github.com/iris-contrib/middleware/logger"
-    "github.com/kataras/iris"
+	"github.com/iris-contrib/middleware/logger"
+	"github.com/kataras/iris"
 
-    "github.com/fatih/color"
-
+	"github.com/fatih/color"
 )
 
 func main() {
+	// Iris config
+	iris.Config.DisableBanner = true
 
-    // Iris config
-    iris.Config.DisableBanner = true
+	// set the global middlewares
+	iris.Use(logger.New(iris.Logger))
 
-    // set the global middlewares
-	  iris.Use(logger.New(iris.Logger))
+	// set the custom errors
+	iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
+		ctx.Render("errors/404.html", iris.Map{"Title": iris.StatusText(iris.StatusNotFound)})
+	})
 
-    // set the custom errors
-    iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
-        ctx.Render("errors/404.html", iris.Map{"Title": iris.StatusText(iris.StatusNotFound)})
-    })
+	iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
+		ctx.Render("errors/500.html", nil, iris.RenderOptions{"layout": iris.NoLayout})
+	})
 
-    iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
-        ctx.Render("errors/500.html", nil, iris.RenderOptions{"layout": iris.NoLayout})
-    })
+	// register public API
+	registerRoutes()
 
-    // register public API
-    registerRoutes()
+	// Parse config
+	var cfg config.Config
+	cfg.Parse()
 
-    // Parse config
-    var cfg config.Config
-    cfg.Parse()
+	// MongoDb
+	db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
 
-    // MongoDb
-    db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
+	color.Cyan(banner)
+	color.Cyan("Magic happens on port " + strconv.Itoa(cfg.HttpPort))
 
-    color.Cyan(banner)
-    color.Cyan("Magic happens on port " + strconv.Itoa(cfg.HttpPort))
-
-    // start the server
-    iris.Listen(cfg.HttpHost + ":" + strconv.Itoa(cfg.HttpPort))
+	// start the server
+	iris.Listen(cfg.HttpHost + ":" + strconv.Itoa(cfg.HttpPort))
 }
 
 func registerRoutes() {
-    // STATUS
-	  iris.Get("/status", routes.GetStatus)
+	// STATUS
+	iris.Get("/status", routes.GetStatus)
 
-    // DEVICES
-	  iris.Post("/devices", routes.CreateDevice)
-	  iris.Get("/devices", routes.GetDevices)
+	// DEVICES
+	iris.Post("/devices", routes.CreateDevice)
+	iris.Get("/devices", routes.GetDevices)
 
-    iris.Get("/devices/:id", routes.GetDevice)
-    iris.Put("/devices/:id", routes.UpdateDevice)
+	iris.Get("/devices/:id", routes.GetDevice)
+	iris.Put("/devices/:id", routes.UpdateDevice)
 
-    iris.Delete("/devices/:id", routes.DeleteDevice)
+	iris.Delete("/devices/:id", routes.DeleteDevice)
 
-    // CHANNELS
-	  iris.Post("/channels", routes.CreateChannel)
-	  iris.Get("/channels", routes.GetChannels)
+	// CHANNELS
+	iris.Post("/channels", routes.CreateChannel)
+	iris.Get("/channels", routes.GetChannels)
 
-    iris.Get("/channels/:id", routes.GetChannel)
-    iris.Put("/channels/:id", routes.UpdateChannel)
+	iris.Get("/channels/:id", routes.GetChannel)
+	iris.Put("/channels/:id", routes.UpdateChannel)
 
-    iris.Delete("/channels/:id", routes.DeleteChannel)
+	iris.Delete("/channels/:id", routes.DeleteChannel)
 }
 
 var banner = `
@@ -96,4 +94,3 @@ _|      _|    _|_|_|  _|  _|    _|    _|      _|    _|_|_|  _|    _|
                        ** LITE **
 
 `
-

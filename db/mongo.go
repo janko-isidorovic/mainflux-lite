@@ -9,93 +9,92 @@
 package db
 
 import (
-    "strconv"
-	  "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2"
+	"strconv"
 )
 
-
 var (
-    mainSession *mgo.Session
-	  mainDb      *mgo.Database
-    DbName    string
+	mainSession *mgo.Session
+	mainDb      *mgo.Database
+	DbName      string
 )
 
 type MgoDb struct {
-	  Session *mgo.Session
-	  Db      *mgo.Database
-	  Col     *mgo.Collection
+	Session *mgo.Session
+	Db      *mgo.Database
+	Col     *mgo.Collection
 }
 
 func InitMongo(host string, port int, db string) error {
-		var err error
-	  if mainSession == nil {
-		    mainSession, err = mgo.Dial("mongodb://" + host + ":" + strconv.Itoa(port))
+	var err error
+	if mainSession == nil {
+		mainSession, err = mgo.Dial("mongodb://" + host + ":" + strconv.Itoa(port))
 
-		    if err != nil {
-			      panic(err)
-		    }
+		if err != nil {
+			panic(err)
+		}
 
-        mainSession.SetMode(mgo.Monotonic, true)
-        mainDb = mainSession.DB(db)
-        DbName = db
-	  }
+		mainSession.SetMode(mgo.Monotonic, true)
+		mainDb = mainSession.DB(db)
+		DbName = db
+	}
 
-    return err
+	return err
 }
 
 func (this *MgoDb) Init() *mgo.Session {
-	  this.Session = mainSession.Copy()
-	  this.Db = this.Session.DB(DbName)
+	this.Session = mainSession.Copy()
+	this.Db = this.Session.DB(DbName)
 
-    return this.Session
+	return this.Session
 }
 
 func (this *MgoDb) C(collection string) *mgo.Collection {
-    this.Col = this.Session.DB(DbName).C(collection)
-	  return this.Col
+	this.Col = this.Session.DB(DbName).C(collection)
+	return this.Col
 }
 
 func (this *MgoDb) Close() bool {
-    defer this.Session.Close()
-    return true
+	defer this.Session.Close()
+	return true
 }
 
 func (this *MgoDb) DropoDb() {
-    err := this.Session.DB(DbName).DropDatabase()
-    if err != nil {
-		    panic(err)
-    }
+	err := this.Session.DB(DbName).DropDatabase()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (this *MgoDb) RemoveAll(collection string) bool {
-    this.Session.DB(DbName).C(collection).RemoveAll(nil)
+	this.Session.DB(DbName).C(collection).RemoveAll(nil)
 
-    this.Col = this.Session.DB(DbName).C(collection)
-    return true
+	this.Col = this.Session.DB(DbName).C(collection)
+	return true
 }
 
 func (this *MgoDb) Index(collection string, keys []string) bool {
-    index := mgo.Index{
-        Key:        keys,
-        Unique:     true,
-        DropDups:   true,
-        Background: true,
-        Sparse:     true,
-    }
-	  err := this.Db.C(collection).EnsureIndex(index)
-	  if err != nil {
-        panic(err)
+	index := mgo.Index{
+		Key:        keys,
+		Unique:     true,
+		DropDups:   true,
+		Background: true,
+		Sparse:     true,
+	}
+	err := this.Db.C(collection).EnsureIndex(index)
+	if err != nil {
+		panic(err)
 
-        return false
-    }
+		return false
+	}
 
-    return true
+	return true
 }
 
 func (this *MgoDb) IsDup(err error) bool {
-    if mgo.IsDup(err) {
-        return true
-    }
+	if mgo.IsDup(err) {
+		return true
+	}
 
-    return false
+	return false
 }

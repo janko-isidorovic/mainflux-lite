@@ -9,29 +9,27 @@
 package models
 
 type (
-    DeviceLocation struct {
-        Name string `json: "name"`
-        Latitude int `json: "latitude"`
-        Longitude int `json: "longitude"`
-        Elevation int `json: "elevation"`
-    }
+	DeviceLocation struct {
+		Name      string `json: "name"`
+		Latitude  int    `json: "latitude"`
+		Longitude int    `json: "longitude"`
+		Elevation int    `json: "elevation"`
+	}
 
-    Device struct {
-        Id string   `json: "id"`
-        Name string `json: "name"`
+	Device struct {
+		Id   string `json: "id"`
+		Name string `json: "name"`
 
+		Description string         `json: "name"`
+		Visibility  string         `json: "name"`
+		Status      string         `json: "name"`
+		Tags        []string       `json: "name"`
+		Location    DeviceLocation `json: "location"`
 
-        Description string `json: "name"`
-        Visibility string `json: "name"`
-        Status string `json: "name"`
-        Tags []string `json: "name"`
-        Location DeviceLocation `json: "location"`
+		Created string `json: "created"`
+		Updated string `json: "updated"`
 
-
-        Created string `json: "created"`
-        Updated string `json: "updated"`
-
-        Metadata map[string]interface{} `json: "metadata"`
-        Mfprivate map[string]interface{} `json: "mfprivate"`
-    }
+		Metadata  map[string]interface{} `json: "metadata"`
+		Mfprivate map[string]interface{} `json: "mfprivate"`
+	}
 )

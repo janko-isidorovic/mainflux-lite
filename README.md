@@ -54,19 +54,19 @@ $GOBIN/mainflux-lite
 
 Please note that the binary `mainflux-lite` expects to find configuration file `config.yml` in
 direcotry provided by `MAINFLUX_LITE_CONFIG_DIR` if this variable is set. Otherwise it looks for `config.yml`
-in `$GOPATH/src/github.com/mainflux/mainflux-core-server`.
+in `$GOPATH/src/github.com/mainflux/mainflux-lite`.
 
 Note also that using `go get` is prefered than out-of-gopath code fetch by cloning the git repo like this:
 ```
-git clone https://github.com/Mainflux/mainflux-core-server && cd mainflux-lite
+git clone https://github.com/Mainflux/mainflux-lite && cd mainflux-lite
 go get
 go build
-MAINFLUX_CORE_SERVER_CONFIG_DIR=. ./mainflux-core-server
+MAINFLUX_LITE_CONFIG_DIR=. ./mainflux-lite
 ```
 #### Dependencies
-Mainflux Core Server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
+Mainflux Lite Server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
 
-This is why to run Mainflux Core Server you have to have running:
+This is why to run Mainflux Lite Server you have to have running:
 - [MongoDB](https://github.com/mongodb/mongo)
 - [InfluxDB](https://github.com/influxdata/influxdb)
 
@@ -79,7 +79,7 @@ docker run -p 8086:8086 -it influxdb
 ```
 Now you can run `mainflux-lite`:
 ```bash
-MAINFLUX_LITE_CONFIG_DIR=. ./mainflux-core-server
+MAINFLUX_LITE_CONFIG_DIR=. ./mainflux-lite
 ```
 
 Note that when running services in this way (weather they are installed in the localhost system or run and mapped on localhost ports) you will need to change [`config.yml`](config.yml) and replace `influx` and `mongo` hostnames by `localhost`

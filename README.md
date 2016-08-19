@@ -64,9 +64,9 @@ go build
 MAINFLUX_LITE_CONFIG_DIR=./config ./mainflux-lite
 ```
 #### Dependencies
-Mainflux Lite Server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
+Mainflux Lite server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
 
-This is why to run Mainflux Lite Server you have to have running:
+This is why to run Mainflux Lite server you have to have running:
 - [MongoDB](https://github.com/mongodb/mongo)
 - [InfluxDB](https://github.com/influxdata/influxdb)
 
@@ -79,7 +79,7 @@ docker run -p 8086:8086 -it influxdb
 ```
 Now you can run `mainflux-lite`:
 ```bash
-MAINFLUX_LITE_CONFIG_DIR=. ./mainflux-lite
+MAINFLUX_LITE_CONFIG_DIR=./config ./mainflux-lite
 ```
 
 Note that when running services in this way (weather they are installed in the localhost system or run and mapped on localhost ports) you will need to change [`config.yml`](config.yml) and replace `influx` and `mongo` hostnames by `localhost`

@@ -10,12 +10,14 @@ Mainflux Lite is the compact and simple single binary (monolith) server with Mai
 It is very useful for development, prototyping and quick and simple deployments - in situation where full-blown Mainflux system (based on plethora of microservices) is not needed.
 
 ### Installation
-#### TL;DR
+Mainflux Lite uses [MongoDB](https://www.mongodb.com/) and [InfluxDB](https://influxdata.com/), so insure that these are installed on your system.
+
+Installing Mainflux Lite is trivial `go get`:
 ```bash
 go get github.com/mainflux/mainflux-lite
 $GOBIN/mainflux-lite
 ```
-#### Docker
+### Docker
 ```bash
 # Influx prerequisite
 docker pull influxdb

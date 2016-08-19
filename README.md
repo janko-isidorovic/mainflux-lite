@@ -61,7 +61,7 @@ Note also that using `go get` is prefered than out-of-gopath code fetch by cloni
 git clone https://github.com/Mainflux/mainflux-lite && cd mainflux-lite
 go get
 go build
-MAINFLUX_LITE_CONFIG_DIR=. ./mainflux-lite
+MAINFLUX_LITE_CONFIG_DIR=./config ./mainflux-lite
 ```
 #### Dependencies
 Mainflux Lite Server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.

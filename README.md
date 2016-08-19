@@ -17,6 +17,7 @@ Installing Mainflux Lite is trivial `go get`:
 go get github.com/mainflux/mainflux-lite
 $GOBIN/mainflux-lite
 ```
+
 ### Docker
 ```bash
 # Influx prerequisite
@@ -31,41 +32,7 @@ docker run --name mainflux-lite -p 7070:7070 --link=mongo:mongo --link=influx:in
         -it mainflux/mainflux-lite
 ```
 
-#### Code
-##### Prerequisite
-If not set already, please set your `GOPATH` and `GOBIN` environment variables. For example:
-```bash
-mkdir -p ~/go
-export GOPATH=~/go
-export GOBIN=$GOPATH/bin
-```
-
-#### Get the code
-Use [`go`](https://golang.org/cmd/go/) tool to "get" (i.e. fetch and build) `mainflux-lite` package:
-```bash
-go get github.com/mainflux/mainflux-lite
-```
-
-This will download the code to `$GOPATH/src/github.com/mainflux/mainflux-lite` directory,
-and then compile it and install the binary in `$GOBIN` directory.
-
-Now you can run the server:
-```bash
-$GOBIN/mainflux-lite
-```
-
-Please note that the binary `mainflux-lite` expects to find configuration file `config.yml` in
-direcotry provided by `MAINFLUX_LITE_CONFIG_DIR` if this variable is set. Otherwise it looks for `config.yml`
-in `$GOPATH/src/github.com/mainflux/mainflux-lite`.
-
-Note also that using `go get` is prefered than out-of-gopath code fetch by cloning the git repo like this:
-```
-git clone https://github.com/Mainflux/mainflux-lite && cd mainflux-lite
-go get
-go build
-MAINFLUX_LITE_CONFIG_DIR=./config ./mainflux-lite
-```
-#### Dependencies
+### Dependencies
 Mainflux Lite server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
 
 This is why to run Mainflux Lite server you have to have running:
@@ -81,10 +48,8 @@ docker run -p 8086:8086 -it influxdb
 ```
 Now you can run `mainflux-lite`:
 ```bash
-MAINFLUX_LITE_CONFIG_DIR=./config ./mainflux-lite
+./mainflux-lite ./config/config.yml
 ```
-
-Note that when running services in this way (weather they are installed in the localhost system or run and mapped on localhost ports) you will need to change [`config.yml`](config.yml) and replace `influx` and `mongo` hostnames by `localhost`
 
 ### Documentation
 Development documentation can be found on our [Mainflux GitHub Wiki](https://github.com/Mainflux/mainflux/wiki).

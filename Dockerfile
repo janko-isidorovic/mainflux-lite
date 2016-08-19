@@ -26,5 +26,5 @@ RUN go get github.com/mainflux/mainflux-lite
 CMD ["/config/lite/config.yml"]
 
 # Run mainflux command by default when the container starts.
-ENTRYPOINT /go/bin/mainflux-lite
+ENTRYPOINT ["/go/bin/mainflux-lite"]
 

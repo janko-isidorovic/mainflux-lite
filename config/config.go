@@ -35,16 +35,18 @@ func (this *Config) Parse() {
 	 * Config
 	 */
 	/** Viper setup */
-	// We can use config.yml from different locations,
-	// depending if we run from
-	cfgDir := os.Getenv("MAINFLUX_CORE_SERVER_CONFIG_DIR")
-	if cfgDir == "" {
-		// default cfg path to source dir, as we keep cfg.yml there
-		cfgDir = os.Getenv("GOPATH") + "/src/github.com/mainflux/mainflux-lite/config"
-	}
 	viper.SetConfigType("yaml")   // or viper.SetConfigType("YAML")
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.AddConfigPath(cfgDir)   // path to look for the config file in
+
+	if len(os.Args) > 1 {
+		// We provided config file as an argument
+		viper.SetConfigFile(os.Args[1])
+	} else {
+		// default cfg path to source dir, as we keep cfg.yml there
+		cfgDir := os.Getenv("GOPATH") + "/src/github.com/mainflux/mainflux-lite/config"
+		viper.SetConfigName("config") // name of config file (without extension)
+		viper.AddConfigPath(cfgDir)   // path to look for the config file in
+	}
+
 	err := viper.ReadInConfig()   // Find and read the config file
 	if err != nil {               // Handle errors reading the config file
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))

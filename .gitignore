@@ -44,4 +44,4 @@ tags
 ./src
 
 # Binary
-mainflux-core-server
+mainflux-lite

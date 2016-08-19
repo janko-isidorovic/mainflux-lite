@@ -1,0 +1,31 @@
+###
+# Copyright (c) Mainflux
+#
+# Mainflux server is licensed under an Apache license, version 2.0.
+# All rights not explicitly granted in the Apache license, version 2.0 are reserved.
+# See the included LICENSE file for more details.
+###
+
+###
+# HTPP Server
+###
+http:
+  host: "0.0.0.0"
+  port: 7070
+
+###
+# MongoDB
+###
+mongo:
+  host: "mongo"
+  port: 27017
+  db: "mainflux"
+
+###
+# InfluxDB
+###
+influx:
+  host: "nats"
+  port: 8086
+  db: "mainflux"
+

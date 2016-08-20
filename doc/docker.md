@@ -1,8 +1,13 @@
 # Docker
-Insure that you have [Docker](https://www.docker.com/) installed on your host.
+Insure that you have [Docker](https://www.docker.com/) installed on your host as well as [Docker Compose](https://docs.docker.com/compose/).
 
-Now you can fetch all the images and start the containers:
+It is very easy to start Docker composition (Mainflux Lite depends on MongoDB and InfluxDB and has to be started in composition with them):
+```
+wget https://raw.githubusercontent.com/Mainflux/mainflux-lite/master/docker-compose.yml
+docker-compose up
+```
 
+Otherwise, you can fetch all the images one by one and start the containers manually:
 ```bash
 # Influx prerequisite
 docker pull influxdb

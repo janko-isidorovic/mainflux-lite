@@ -16,3 +16,7 @@ Now you can run `mainflux-lite`:
 ```bash
 ./mainflux-lite ./config/config.yml
 ```
+
+> N.B. Since `mongo` and `influxdb` containers are not started in the composition (via `docker-compose`), but manually, we have to bind port of each container to development host. This way `mainflux-lite` binary that is started on the host will see correct services it expects on `localhost`
+
+For more info about Docker images you can look [here](https://github.com/Mainflux/mainflux-lite/blob/master/doc/docker.md)

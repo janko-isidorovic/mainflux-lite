@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Mainflux/mainflux-lite)](https://goreportcard.com/report/github.com/Mainflux/mainflux-lite)
 [![Join the chat at https://gitter.im/Mainflux/mainflux](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Mainflux/mainflux?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Mainflux Lite is the compact and simple single binary (monolith) server with Mainflux IoT functionalities.
+Mainflux Lite is the compact and simple single-binary server with Mainflux IoT functionalities.
 
 It is very useful for development, prototyping and quick and simple deployments - in situation where full-blown Mainflux system (based on plethora of microservices) is not needed.
 

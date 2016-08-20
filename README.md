@@ -18,38 +18,15 @@ go get github.com/mainflux/mainflux-lite
 $GOBIN/mainflux-lite
 ```
 
+If you are new to Go, more information about setting-up environment and fetching Mainflux Lite code can be found [here]().
+
 ### Docker
-```bash
-# Influx prerequisite
-docker pull influxdb
-docker run --name influx -it influxdb
-# MongoDB prerequisite
-docker pull mongo
-docker run --name mongo -it mongo
-# Mainflux Lite
-docker pull mainflux/mainflux-lite
-docker run --name mainflux-lite -p 7070:7070 --link=mongo:mongo --link=influx:influx \
-        -it mainflux/mainflux-lite
+Running Mainflux Lite in a Docker container is equally trivial:
 ```
-
-### Dependencies
-Mainflux Lite server is connected to `MongoDB` (and potentially `InfluxDB`) on southbound interface.
-
-This is why to run Mainflux Lite server you have to have running:
-- [MongoDB](https://github.com/mongodb/mongo)
-- [InfluxDB](https://github.com/influxdata/influxdb)
-
-Installation and start of these services depends the operating system running on host (e.g. for Debian you can use `apt-get` to fetch and install these), so you must follow the installation instructions for each of the project.
-
-However, each of these projects provides an official Docker image which can be pulled from DockerHub and started in a separate container (each in separate terminal if not detached):
-```bash
-docker run -p 27017:27017 -it mongo
-docker run -p 8086:8086 -it influxdb
+wget https://raw.githubusercontent.com/Mainflux/mainflux-lite/master/docker-compose.yml
+docker-compose up
 ```
-Now you can run `mainflux-lite`:
-```bash
-./mainflux-lite ./config/config.yml
-```
+You will of course have to have [Docker Compose](https://docs.docker.com/compose/) installed on your machine.
 
 ### Documentation
 Development documentation can be found on our [Mainflux GitHub Wiki](https://github.com/Mainflux/mainflux/wiki).

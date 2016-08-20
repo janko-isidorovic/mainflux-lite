@@ -18,7 +18,7 @@ go get github.com/mainflux/mainflux-lite
 $GOBIN/mainflux-lite
 ```
 
-If you are new to Go, more information about setting-up environment and fetching Mainflux Lite code can be found [here]().
+If you are new to Go, more information about setting-up environment and fetching Mainflux Lite code can be found [here](https://github.com/Mainflux/mainflux-lite/blob/master/doc/install.md).
 
 ### Docker
 Running Mainflux Lite in a Docker container is equally trivial:

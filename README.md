@@ -28,6 +28,8 @@ docker-compose up
 ```
 You will of course have to have [Docker Compose](https://docs.docker.com/compose/) installed on your machine.
 
+For more information about running Mainflux Lite in Docker take a look [here](https://github.com/Mainflux/mainflux-lite/blob/master/doc/docker.md).
+
 ### Documentation
 Development documentation can be found on our [Mainflux GitHub Wiki](https://github.com/Mainflux/mainflux/wiki).
 

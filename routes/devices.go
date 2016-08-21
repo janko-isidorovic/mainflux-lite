@@ -56,6 +56,8 @@ func CreateDevice(ctx *iris.Context) {
 	ctx.ReadJSON(&body)
 	if validateJsonSchema(body) != true {
 		println("Invalid schema")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
+		return
 	}
 
 	// Init new Mongo session
@@ -88,7 +90,7 @@ func CreateDevice(ctx *iris.Context) {
 	// Insert Device
 	erri := Db.C("devices").Insert(d)
 	if erri != nil {
-		ctx.JSON(iris.StatusInternalServerError, iris.Map{"response": "error: can not create device")
+		ctx.JSON(iris.StatusInternalServerError, iris.Map{"response": "cannot create device"})
 		return
 	}
 
@@ -149,6 +151,8 @@ func UpdateDevice(ctx *iris.Context) {
 	// Validate JSON schema user provided
 	if validateJsonSchema(body) != true {
 		println("Invalid schema")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
+		return
 	}
 
 	// Check if someone is trying to change "id" key

@@ -30,6 +30,5 @@ type (
 		Updated string `json: "updated"`
 
 		Metadata  map[string]interface{} `json: "metadata"`
-		Mfprivate map[string]interface{} `json: "mfprivate"`
 	}
 )

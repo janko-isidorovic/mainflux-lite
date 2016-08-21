@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/models"
@@ -80,6 +81,10 @@ func CreateDevice(ctx *iris.Context) {
 
 	d.Id = uuid.String()
 
+	// Timestamp
+	t := time.Now().UTC().Format(time.RFC3339)
+	d.Created, d.Updated = t, t
+
 	// Insert Device
 	erri := Db.C("devices").Insert(d)
 	if erri != nil {
@@ -87,7 +92,7 @@ func CreateDevice(ctx *iris.Context) {
 		panic(erri)
 	}
 
-	ctx.Write("Created Device req.deviceId")
+	ctx.JSON(iris.StatusOK, iris.Map{"response": "created", "id": d.Id})
 }
 
 /**
@@ -104,12 +109,7 @@ func GetDevices(ctx *iris.Context) {
 		log.Print(err)
 	}
 
-	res, err := json.Marshal(results)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	ctx.Write(string(res))
+	ctx.JSON(iris.StatusOK, &results)
 }
 
 /**
@@ -128,11 +128,7 @@ func GetDevice(ctx *iris.Context) {
 		log.Print(err)
 	}
 
-	res, err := json.Marshal(result)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	ctx.Write(string(res))
+	ctx.JSON(iris.StatusOK, &result)
 }
 
 /**
@@ -159,6 +155,12 @@ func UpdateDevice(ctx *iris.Context) {
 		println("Error: can not change device ID")
 	}
 
+	// Timestamp
+	t := time.Now().UTC().Format(time.RFC3339)
+	body["updated"] = t
+
+	println(body)
+
 	colQuerier := bson.M{"id": id}
 	change := bson.M{"$set": body}
 	err := Db.C("devices").Update(colQuerier, change)
@@ -166,7 +168,8 @@ func UpdateDevice(ctx *iris.Context) {
 		log.Print(err)
 	}
 
-	ctx.Write(`{"status":"updated"}`)
+
+	ctx.JSON(iris.StatusOK, iris.Map{"response": "updated", "id": id})
 }
 
 /**
@@ -184,5 +187,5 @@ func DeleteDevice(ctx *iris.Context) {
 		log.Print(err)
 	}
 
-	ctx.Write(`{"status":"deleted"}`)
+	ctx.JSON(iris.StatusOK, iris.Map{"response": "deleted", "id": id})
 }

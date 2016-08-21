@@ -4,20 +4,69 @@
   "properties": {
     "id": {
       "type": "string",
-      "default": "AAAA"
+      "default": ""
     },
     "name": {
       "type": "string",
-      "default": "Test"
+      "default": "Unnamed Device"
     },
-    "blah": {
+    "description": {
       "type": "string",
-      "default": "nesto"
+      "default": ""
+    },
+    "visibility": {
+      "type": "string",
+      "default": "private"
+    },
+    "status": {
+      "type": "string",
+      "default": "disabled"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "default": ""
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "latitude": {
+          "type": "number",
+          "default": 0
+        },
+        "longitude": {
+          "type": "number",
+          "default": 0
+        },
+        "elevation": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "default": {"name": "", "latitude": 0, "longitude": 0, "elevation": 0}
+    },
+    "created": {
+      "type": "string",
+      "default": ""
+    },
+    "updated": {
+      "type": "string",
+      "default": ""
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {}
     }
   },
+  "additionalProperties": false,
   "required": [
-    "id",
-    "name",
-    "blah"
+    "name"
   ]
 }
+

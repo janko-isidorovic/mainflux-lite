@@ -12,40 +12,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/models"
 
 	"github.com/satori/go.uuid"
-	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/kataras/iris"
 )
-
-func validateJsonSchema(b map[string]interface{}) bool {
-	pwd, _ := os.Getwd()
-	schemaLoader := gojsonschema.NewReferenceLoader("file://" + pwd +
-		"/models/deviceSchema.json")
-	bodyLoader := gojsonschema.NewGoLoader(b)
-	result, err := gojsonschema.Validate(schemaLoader, bodyLoader)
-	if err != nil {
-		log.Print(err.Error())
-	}
-
-	if result.Valid() {
-		fmt.Printf("The document is valid\n")
-		return true
-	} else {
-		fmt.Printf("The document is not valid. See errors :\n")
-		for _, desc := range result.Errors() {
-			fmt.Printf("- %s\n", desc)
-		}
-		return false
-	}
-}
 
 /** == Functions == */
 /**
@@ -54,7 +30,7 @@ func validateJsonSchema(b map[string]interface{}) bool {
 func CreateDevice(ctx *iris.Context) {
 	var body map[string]interface{}
 	ctx.ReadJSON(&body)
-	if validateJsonSchema(body) != true {
+	if validateJsonSchema("device", body) != true {
 		println("Invalid schema")
 		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
 		return
@@ -122,7 +98,7 @@ func GetDevice(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("device_id")
 
 	result := models.Device{}
 	err := Db.C("devices").Find(bson.M{"id": id}).One(&result)
@@ -146,10 +122,10 @@ func UpdateDevice(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("device_id")
 
 	// Validate JSON schema user provided
-	if validateJsonSchema(body) != true {
+	if validateJsonSchema("device", body) != true {
 		println("Invalid schema")
 		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
 		return
@@ -158,14 +134,18 @@ func UpdateDevice(ctx *iris.Context) {
 	// Check if someone is trying to change "id" key
 	// and protect us from this
 	if _, ok := body["id"]; ok {
-		println("Error: can not change device ID")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: device id is read-only"})
+		return
+	}
+	if _, ok := body["created"]; ok {
+		println("Error: can not change device")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'created' is read-only"})
+		return
 	}
 
 	// Timestamp
 	t := time.Now().UTC().Format(time.RFC3339)
 	body["updated"] = t
-
-	println(body)
 
 	colQuerier := bson.M{"id": id}
 	change := bson.M{"$set": body}
@@ -187,7 +167,7 @@ func DeleteDevice(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("device_id")
 
 	err := Db.C("devices").Remove(bson.M{"id": id})
 	if err != nil {

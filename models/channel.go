@@ -25,9 +25,6 @@ type (
 
 		Ts SenML `json:"ts"`
 
-		Msg map[string]interface{} `json:"msg"`
-
 		Metadata  map[string]interface{} `json:"metadata"`
-		Mfprivate map[string]interface{} `json:"mfprivate"`
 	}
 )

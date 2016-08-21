@@ -12,13 +12,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/models"
 
-	"github.com/influxdata/influxdb/client/v2"
 	"github.com/satori/go.uuid"
 	"gopkg.in/mgo.v2/bson"
 
@@ -26,115 +24,69 @@ import (
 )
 
 /** == Functions == */
+func formatTs(s map[string]interface{}) models.SenML {
 
-func insertTs(id string, ts models.SenML) int {
-	rc := 0
+	r := models.SenML{}
 
-	// Insert in SenML in Influx
-	// SenML can contain several datapoints
-	// and can target different tags
+	// E
+	if _, ok := s["E"]; !ok {
+		//ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'id' is read-only"})
+		//return
 
-	// Loop here for each attribute
-	for k, v := range ts.E {
-		tags := map[string]string{
-			"attribute": ts.E[k]["n"].(string),
-		}
+		// XXX How do we do error here?
+		println("E does not exist")
+	}
 
-		// Examine if "v" exists, then "sv", then "bv"
-		var field map[string]interface{}
-		if vv, okv := v["v"]; okv {
-			field["value"] = vv
-		} else if vsv, oksv := v["sv"]; oksv {
-			field["value"] = vsv
-		} else if vbv, okbv := v["bv"]; okbv {
-			field["value"] = vbv
-		}
-
-		/**
-		 * Handle time
-		 *
-		 * If either the Base Time or Time value is missing, the missing
-		 * attribute is considered to have a value of zero.  The Base Time and
-		 * Time values are added together to get the time of measurement.  A
-		 * time of zero indicates that the sensor does not know the absolute
-		 * time and the measurement was made roughly "now".  A negative value is
-		 * used to indicate seconds in the past from roughly "now".  A positive
-		 * value is used to indicate the number of seconds, excluding leap
-		 * seconds, since the start of the year 1970 in UTC.
-		 */
-		// Set time base
-		var tb float64
-		if bt := ts.Bt; bt != 0.0 {
-			// If bt is sent and is different than zero
-			// N.B. if bt was not sent, `ts.Bt` will still be zero, as this is init value
-			tb = bt
+	// Loop here for each attribute and format
+	e := s["e"].([]map[string]interface{})
+	for k, v := range e {
+		// t
+		if _, ok := s["bt"]; ok {
+			// XXX - must parse time in good format!
+			if _, ok := v["t"]; ok {
+				r.E[k]["t"] = s["bt"].(int64) + v["t"].(int64)
+			} else {
+				r.E[k]["t"] = s["bt"].(int64)
+			}
 		} else {
-			// If not that means that sensor does not have RTC
-			// and want us to use our NTP - "roughly now"
-			tb = float64(time.Now().Unix())
+			r.E[k]["t"] = time.Now().UTC().Format(time.RFC3339)
 		}
 
-		// Set relative time
-		var tr int64
-		if vt, okvt := v["t"]; okvt {
-			// If there is relative time, use it
-			tr = vt.(int64)
-		} else {
-			// Otherwise it is considered as zero
-			tr = 0
+		// n
+		if _, ok := s["n"]; ok {
+			if _, ok := v["n"]; ok {
+				r.E[k]["n"] = s["bn"].(string) + v["n"].(string)
+			} else {
+				r.E[k]["n"] = s["bn"].(string)
+			}
 		}
 
-		// Total time
-		tt := tb + float64(tr)
-		// Break into int and fractional nb
-		ts, tsf := math.Modf(tt)
-		// Find nanoseconds number from fractional part
-		tns := tsf * 1000 * 1000
-
-		// Get time in Unix format, based on s and ns
-		t := time.Unix(int64(ts), int64(tns))
-		pt, err := client.NewPoint(id, tags, field, t)
-
-		if err != nil {
-			log.Fatalln("Error: ", err)
+		// u
+		if _, ok := s["bu"]; ok {
+			if _, ok := v["u"]; ok {
+				r.E[k]["u"] = s["bu"].(string) + v["u"].(string)
+			} else {
+				r.E[k]["u"] = s["bu"].(string)
+			}
 		}
 
-		db.IfxConn.Bp.AddPoint(pt)
-	}
-
-	// Write the batch
-	db.IfxConn.C.Write(db.IfxConn.Bp)
-
-	return rc
-}
-
-func insertMsg(id string, msg map[string]interface{}) int {
-	rc := 0
-
-	// Insert Msg in Influx
-	// Check if we can insert one message blob as a single datapoint
-	tags := map[string]string{
-		"attribute": "msg",
-	}
-	client.NewPoint(id, tags, msg, time.Now())
-	return rc
-}
-
-// QueryDB convenience function to query the database
-func queryInfluxDb(clnt client.Client, cmd string) (res []client.Result, err error) {
-	q := client.Query{
-		Command:  cmd,
-		Database: "Mainflux",
-	}
-	if response, err := db.IfxConn.C.Query(q); err == nil {
-		if response.Error() != nil {
-			return res, response.Error()
+		// v
+		if _, ok := v["v"]; ok {
+			r.E[k]["v"] = v["v"].(float64)
 		}
-		res = response.Results
-	} else {
-		return res, err
+
+		// sv
+		if _, ok := v["sv"]; ok {
+			r.E[k]["sv"] = v["sv"].(string)
+		}
+
+		// bv
+		if _, ok := v["bv"]; ok {
+			r.E[k]["bv"] = v["bv"].(float64)
+		}
 	}
-	return res, nil
+
+	return r
 }
 
 /**
@@ -143,12 +95,16 @@ func queryInfluxDb(clnt client.Client, cmd string) (res []client.Result, err err
 func CreateChannel(ctx *iris.Context) {
 	var body map[string]interface{}
 	ctx.ReadJSON(&body)
-	if validateJsonSchema(body) != true {
+	/*
+	if validateJsonSchema("channel", body) != true {
 		println("Invalid schema")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
+		return
 	}
+	*/
 
 	// Init new Mongo session
-	// and get the "devices" collection
+	// and get the "channels" collection
 	// from this new session
 	Db := db.MgoDb{}
 	Db.Init()
@@ -161,25 +117,31 @@ func CreateChannel(ctx *iris.Context) {
 	}
 
 	// Set up defaults and pick up new values from user-provided JSON
-	channel := models.Channel{Id: "Some Id"}
-	json.Unmarshal(j, &channel)
+	c := models.Channel{Id: "Some Id"}
+	json.Unmarshal(j, &c)
 
 	// Creating UUID Version 4
 	uuid := uuid.NewV4()
 	fmt.Println(uuid.String())
 
-	channel.Id = uuid.String()
+	c.Id = uuid.String()
 
-	fmt.Println(channel)
+	// Insert reference to DeviceId
+	did := ctx.Param("device_id")
+	c.Device = did
 
-	// Insert Device
-	erri := Db.C("channels").Insert(channel)
+	// Timestamp
+	t := time.Now().UTC().Format(time.RFC3339)
+	c.Created, c.Updated = t, t
+
+	// Insert Channel
+	erri := Db.C("channels").Insert(c)
 	if erri != nil {
-		println("CANNOT INSERT")
-		panic(erri)
+		ctx.JSON(iris.StatusInternalServerError, iris.Map{"response": "cannot create device"})
+		return
 	}
 
-	ctx.Write("Created Device req.channelId")
+	ctx.JSON(iris.StatusCreated, iris.Map{"response": "created", "id": c.Id})
 }
 
 /**
@@ -193,16 +155,10 @@ func GetChannels(ctx *iris.Context) {
 	results := []models.Channel{}
 	err := Db.C("channels").Find(nil).All(&results)
 	if err != nil {
-		println("ERROR!!!")
 		log.Print(err)
 	}
 
-	res, err := json.Marshal(results)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	ctx.Write(string(res))
+	ctx.JSON(iris.StatusOK, &results)
 }
 
 /**
@@ -213,21 +169,17 @@ func GetChannel(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("channel_id")
 
 	result := models.Channel{}
 	err := Db.C("channels").Find(bson.M{"id": id}).One(&result)
 	if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not found", "id": id})
+		return
 	}
 
-	res, err := json.Marshal(result)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Println(res)
-
-	ctx.Write(string(res))
+	ctx.JSON(iris.StatusOK, &result)
 }
 
 /**
@@ -237,30 +189,53 @@ func UpdateChannel(ctx *iris.Context) {
 	var body map[string]interface{}
 	ctx.ReadJSON(&body)
 	// Validate JSON schema user provided
-	if validateJsonSchema(body) != true {
+	if validateJsonSchema("channel", body) != true {
 		println("Invalid schema")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
+		return
 	}
 
 	Db := db.MgoDb{}
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("channel_id")
 
 	// Check if someone is trying to change "id" key
 	// and protect us from this
 	if _, ok := body["id"]; ok {
-		println("Error: can not change device ID")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'id' is read-only"})
+		return
 	}
+	if _, ok := body["device"]; ok {
+		println("Error: can not change device")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'device' is read-only"})
+		return
+	}
+	if _, ok := body["created"]; ok {
+		println("Error: can not change device")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'created' is read-only"})
+		return
+	}
+
+	if _, ok := body["device"]; ok {
+		body["ts"] = formatTs(body["ts"].(map[string]interface{}))
+	}
+
+	// Timestamp
+	t := time.Now().UTC().Format(time.RFC3339)
+	body["updated"] = t
 
 	colQuerier := bson.M{"id": id}
 	change := bson.M{"$set": body}
 	err := Db.C("channels").Update(colQuerier, change)
 	if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not updated", "id": id})
+		return
 	}
 
-	ctx.Write(`{"status":"updated"}`)
+	ctx.JSON(iris.StatusOK, iris.Map{"response": "updated", "id": id})
 }
 
 /**
@@ -271,32 +246,16 @@ func DeleteChannel(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("id")
+	id := ctx.Param("channel_id")
 
 	err := Db.C("channels").Remove(bson.M{"id": id})
-	if err != nil {
+		if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not deleted", "id": id})
+		return
 	}
 
-	ctx.Write(`{"status":"deleted"}`)
+	ctx.JSON(iris.StatusOK, iris.Map{"response": "deleted", "id": id})
 }
 
-/**
- * SendChannel()
- */
-func SendChannel(ctx *iris.Context) {
-	var body map[string]interface{}
-	ctx.ReadJSON(&body)
 
-	id := ctx.Param("id")
-
-	if m, ok := body["msg"]; ok {
-		insertMsg(id, m.(map[string]interface{}))
-	}
-
-	if t, ok := body["ts"]; ok {
-		insertTs(id, t.(models.SenML))
-	}
-
-	ctx.Write(`{"status":"inserted"}`)
-}

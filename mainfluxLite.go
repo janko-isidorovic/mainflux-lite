@@ -62,19 +62,19 @@ func registerRoutes() {
 	iris.Post("/devices", routes.CreateDevice)
 	iris.Get("/devices", routes.GetDevices)
 
-	iris.Get("/devices/:id", routes.GetDevice)
-	iris.Put("/devices/:id", routes.UpdateDevice)
+	iris.Get("/devices/:device_id", routes.GetDevice)
+	iris.Put("/devices/:device_id", routes.UpdateDevice)
 
-	iris.Delete("/devices/:id", routes.DeleteDevice)
+	iris.Delete("/devices/:device_id", routes.DeleteDevice)
 
 	// CHANNELS
-	iris.Post("/channels", routes.CreateChannel)
-	iris.Get("/channels", routes.GetChannels)
+	iris.Post("/devices/:device_id/channels", routes.CreateChannel)
+	iris.Get("/devices/:device_id/channels", routes.GetChannels)
 
-	iris.Get("/channels/:id", routes.GetChannel)
-	iris.Put("/channels/:id", routes.UpdateChannel)
+	iris.Get("/devices/:device_id/channels/:channel_id", routes.GetChannel)
+	iris.Put("/devices/:device_id/channels/:channel_id", routes.UpdateChannel)
 
-	iris.Delete("/channels/:id", routes.DeleteChannel)
+	iris.Delete("/devices/:device_id/channels/:channel_id", routes.DeleteChannel)
 }
 
 var banner = `

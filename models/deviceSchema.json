@@ -4,7 +4,8 @@
   "properties": {
     "id": {
       "type": "string",
-      "default": ""
+      "default": "",
+	  "readOnly": true
     },
     "name": {
       "type": "string",
@@ -53,19 +54,19 @@
     },
     "created": {
       "type": "string",
-      "default": ""
+      "default": "",
+	  "reaOnly": true
     },
     "updated": {
       "type": "string",
-      "default": ""
+      "default": "",
+	  "readOnly": true
     },
     "metadata": {
       "type": "object",
       "properties": {}
     }
   },
-  "additionalProperties": false,
-  "required": [
-  ]
+  "additionalProperties": false
 }
 

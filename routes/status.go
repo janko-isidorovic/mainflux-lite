@@ -8,8 +8,6 @@
 package routes
 
 import (
-	"fmt"
-
 	"github.com/kataras/iris"
 )
 
@@ -19,6 +17,5 @@ import (
  * getStatus()
  */
 func GetStatus(ctx *iris.Context) {
-	fmt.Println("Status OK")
-	ctx.Write(`{"status":"OK"}`)
+	ctx.JSON(iris.StatusOK, iris.Map{"status": "OK"})
 }

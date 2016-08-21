@@ -39,7 +39,7 @@ func validateJsonSchema(b map[string]interface{}) bool {
 		fmt.Printf("The document is valid\n")
 		return true
 	} else {
-		fmt.Printf("The document is not valid. see errors :\n")
+		fmt.Printf("The document is not valid. See errors :\n")
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}
@@ -175,7 +175,6 @@ func UpdateDevice(ctx *iris.Context) {
 		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not updated", "id": id})
 		return
 	}
-
 
 	ctx.JSON(iris.StatusOK, iris.Map{"response": "updated", "id": id})
 }

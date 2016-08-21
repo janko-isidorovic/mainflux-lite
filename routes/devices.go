@@ -88,11 +88,11 @@ func CreateDevice(ctx *iris.Context) {
 	// Insert Device
 	erri := Db.C("devices").Insert(d)
 	if erri != nil {
-		println("CANNOT INSERT")
-		panic(erri)
+		ctx.JSON(iris.StatusInternalServerError, iris.Map{"response": "error: can not create device")
+		return
 	}
 
-	ctx.JSON(iris.StatusOK, iris.Map{"response": "created", "id": d.Id})
+	ctx.JSON(iris.StatusCreated, iris.Map{"response": "created", "id": d.Id})
 }
 
 /**
@@ -126,6 +126,8 @@ func GetDevice(ctx *iris.Context) {
 	err := Db.C("devices").Find(bson.M{"id": id}).One(&result)
 	if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not found", "id": id})
+		return
 	}
 
 	ctx.JSON(iris.StatusOK, &result)
@@ -166,6 +168,8 @@ func UpdateDevice(ctx *iris.Context) {
 	err := Db.C("devices").Update(colQuerier, change)
 	if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not updated", "id": id})
+		return
 	}
 
 
@@ -185,6 +189,8 @@ func DeleteDevice(ctx *iris.Context) {
 	err := Db.C("devices").Remove(bson.M{"id": id})
 	if err != nil {
 		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not deleted", "id": id})
+		return
 	}
 
 	ctx.JSON(iris.StatusOK, iris.Map{"response": "deleted", "id": id})

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"reflect"
 
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/models"
@@ -21,73 +22,10 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/kataras/iris"
+	"github.com/krylovsk/gosenml"
 )
 
 /** == Functions == */
-func formatTs(s map[string]interface{}) models.SenML {
-
-	r := models.SenML{}
-
-	// E
-	if _, ok := s["E"]; !ok {
-		//ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'id' is read-only"})
-		//return
-
-		// XXX How do we do error here?
-		println("E does not exist")
-	}
-
-	// Loop here for each attribute and format
-	e := s["e"].([]map[string]interface{})
-	for k, v := range e {
-		// t
-		if _, ok := s["bt"]; ok {
-			// XXX - must parse time in good format!
-			if _, ok := v["t"]; ok {
-				r.E[k]["t"] = s["bt"].(int64) + v["t"].(int64)
-			} else {
-				r.E[k]["t"] = s["bt"].(int64)
-			}
-		} else {
-			r.E[k]["t"] = time.Now().UTC().Format(time.RFC3339)
-		}
-
-		// n
-		if _, ok := s["n"]; ok {
-			if _, ok := v["n"]; ok {
-				r.E[k]["n"] = s["bn"].(string) + v["n"].(string)
-			} else {
-				r.E[k]["n"] = s["bn"].(string)
-			}
-		}
-
-		// u
-		if _, ok := s["bu"]; ok {
-			if _, ok := v["u"]; ok {
-				r.E[k]["u"] = s["bu"].(string) + v["u"].(string)
-			} else {
-				r.E[k]["u"] = s["bu"].(string)
-			}
-		}
-
-		// v
-		if _, ok := v["v"]; ok {
-			r.E[k]["v"] = v["v"].(float64)
-		}
-
-		// sv
-		if _, ok := v["sv"]; ok {
-			r.E[k]["sv"] = v["sv"].(string)
-		}
-
-		// bv
-		if _, ok := v["bv"]; ok {
-			r.E[k]["bv"] = v["bv"].(float64)
-		}
-	}
-
-	return r
-}
 
 /**
  * CreateChannel ()
@@ -135,8 +73,8 @@ func CreateChannel(ctx *iris.Context) {
 	c.Created, c.Updated = t, t
 
 	// Insert Channel
-	erri := Db.C("channels").Insert(c)
-	if erri != nil {
+	err := Db.C("channels").Insert(c)
+	if err != nil {
 		ctx.JSON(iris.StatusInternalServerError, iris.Map{"response": "cannot create device"})
 		return
 	}
@@ -189,11 +127,13 @@ func UpdateChannel(ctx *iris.Context) {
 	var body map[string]interface{}
 	ctx.ReadJSON(&body)
 	// Validate JSON schema user provided
+	/*
 	if validateJsonSchema("channel", body) != true {
 		println("Invalid schema")
 		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
 		return
 	}
+	*/
 
 	Db := db.MgoDb{}
 	Db.Init()
@@ -218,16 +158,49 @@ func UpdateChannel(ctx *iris.Context) {
 		return
 	}
 
-	if _, ok := body["device"]; ok {
-		body["ts"] = formatTs(body["ts"].(map[string]interface{}))
+
+	senmlDecoder := gosenml.NewJSONDecoder()
+
+	m, _ := senmlDecoder.DecodeMessage(body["ts"])
+	for _, e := range m.Entries {
+		// BaseName
+		e.Name = m.BaseName + e.Name
+
+		// BaseTime
+		e.Time = m.BaseTime + e.Time
+
+		// BaseUnits
+		if e.Units == "" {
+			e.Units = m.BaseUnits
+		}
+
+		// Insert entry
+		err := Db.C("channels").Insert(e)
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not inserted", "id": id})
+			return
+		}
 	}
 
 	// Timestamp
 	t := time.Now().UTC().Format(time.RFC3339)
 	body["updated"] = t
 
+	/** MongoDB */
 	colQuerier := bson.M{"id": id}
-	change := bson.M{"$set": body}
+
+	// First insert new values
+	change := bson.M{"$set": bson.M{"updated": body["updated"]}}
+	err := Db.C("channels").Update(colQuerier, change)
+	if err != nil {
+		log.Print(err)
+		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not inserted", "id": id})
+		return
+	}
+
+	/** Then update channel timestamp */
+	change = bson.M{"$set": bson.M{"updated": body["updated"]}}
 	err := Db.C("channels").Update(colQuerier, change)
 	if err != nil {
 		log.Print(err)

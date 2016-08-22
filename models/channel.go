@@ -8,22 +8,18 @@
 
 package models
 
-type (
-	SenML struct {
-		Bt  float64                  `json:"bt"`
-		Bn  string                   `json:"bn"`
-		Bu  string                   `json:"bu"`
-		Ver int                      `json:"ver"`
-		E   []map[string]interface{} `json:"e"`
-	}
+import (
+	"github.com/krylovsk/gosenml"
+)
 
+type (
 	Channel struct {
 		Id      string `json:"id"`
 		Device  string `json:"device"`
 		Created string `json:"created"`
 		Updated string `json:"updated"`
 
-		Ts SenML `json:"ts"`
+		Values  gosenml.Entry `json:"values"`
 
 		Metadata  map[string]interface{} `json:"metadata"`
 	}

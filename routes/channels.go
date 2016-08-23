@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"reflect"
 
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/models"
@@ -48,15 +47,9 @@ func CreateChannel(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	// Turn map into a JSON to put it in the Device struct later
-	j, err := json.Marshal(&body)
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	// Set up defaults and pick up new values from user-provided JSON
-	c := models.Channel{Id: "Some Id"}
-	json.Unmarshal(j, &c)
+	c := models.Channel{}
+	json.Unmarshal(ctx.RequestCtx.Request.Body(), &c)
 
 	// Creating UUID Version 4
 	uuid := uuid.NewV4()
@@ -158,24 +151,27 @@ func UpdateChannel(ctx *iris.Context) {
 		return
 	}
 
-
 	senmlDecoder := gosenml.NewJSONDecoder()
-
-	m, _ := senmlDecoder.DecodeMessage(body["ts"])
+	m, _ := senmlDecoder.DecodeMessage(ctx.RequestCtx.Request.Body())
 	for _, e := range m.Entries {
 		// BaseName
 		e.Name = m.BaseName + e.Name
 
 		// BaseTime
 		e.Time = m.BaseTime + e.Time
+		if e.Time <= 0 {
+			e.Time += time.Now().Unix()
+		}
 
 		// BaseUnits
 		if e.Units == "" {
 			e.Units = m.BaseUnits
 		}
 
-		// Insert entry
-		err := Db.C("channels").Insert(e)
+		/** Insert entry in DB */
+		colQuerier := bson.M{"id": id}
+		change := bson.M{"$push": bson.M{"values": e}}
+		err := Db.C("channels").Update(colQuerier, change)
 		if err != nil {
 			log.Print(err)
 			ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not inserted", "id": id})
@@ -187,20 +183,9 @@ func UpdateChannel(ctx *iris.Context) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	body["updated"] = t
 
-	/** MongoDB */
-	colQuerier := bson.M{"id": id}
-
-	// First insert new values
-	change := bson.M{"$set": bson.M{"updated": body["updated"]}}
-	err := Db.C("channels").Update(colQuerier, change)
-	if err != nil {
-		log.Print(err)
-		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not inserted", "id": id})
-		return
-	}
-
 	/** Then update channel timestamp */
-	change = bson.M{"$set": bson.M{"updated": body["updated"]}}
+	colQuerier := bson.M{"id": id}
+	change := bson.M{"$set": bson.M{"updated": body["updated"]}}
 	err := Db.C("channels").Update(colQuerier, change)
 	if err != nil {
 		log.Print(err)

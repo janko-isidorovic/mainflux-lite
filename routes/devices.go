@@ -43,15 +43,9 @@ func CreateDevice(ctx *iris.Context) {
 	Db.Init()
 	defer Db.Close()
 
-	// Turn map into a JSON to put it in the Device struct later
-	j, err := json.Marshal(&body)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	// Set up defaults and pick up new values from user-provided JSON
-	d := models.Device{Id: "Some Id", Name: "Some Name"}
-	json.Unmarshal(j, &d)
+	d := models.Device{Name: "Some Name"}
+	json.Unmarshal(ctx.RequestCtx.Request.Body(), &d)
 
 	// Creating UUID Version 4
 	uuid := uuid.NewV4()

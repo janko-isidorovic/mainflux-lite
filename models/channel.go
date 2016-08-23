@@ -19,7 +19,7 @@ type (
 		Created string `json:"created"`
 		Updated string `json:"updated"`
 
-		Values  gosenml.Entry `json:"values"`
+		Values  []gosenml.Entry `json:"values"`
 
 		Metadata  map[string]interface{} `json:"metadata"`
 	}

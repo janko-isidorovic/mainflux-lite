@@ -21,11 +21,4 @@ mongo:
   port: 27017
   db: "mainflux"
 
-###
-# InfluxDB
-###
-influx:
-  host: "localhost"
-  port: 8086
-  db: "mainflux"
 

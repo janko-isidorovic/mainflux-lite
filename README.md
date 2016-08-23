@@ -10,7 +10,7 @@ Mainflux Lite is the compact and simple single-binary server with Mainflux IoT f
 It is very useful for development, prototyping and quick and simple deployments - in situation where full-blown Mainflux system (based on plethora of microservices) is not needed.
 
 ### Installation
-Mainflux Lite uses [MongoDB](https://www.mongodb.com/) and [InfluxDB](https://influxdata.com/), so insure that these are installed on your system (more info [here](https://github.com/Mainflux/mainflux-lite/blob/master/doc/dependencies.md)).
+Mainflux Lite uses [MongoDB](https://www.mongodb.com/), so insure that it is installed on your system (more info [here](https://github.com/Mainflux/mainflux-lite/blob/master/doc/dependencies.md)).
 
 Installing Mainflux Lite is trivial [`go get`](https://golang.org/cmd/go/):
 ```bash

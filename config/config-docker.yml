@@ -21,11 +21,3 @@ mongo:
   port: 27017
   db: "mainflux"
 
-###
-# InfluxDB
-###
-influx:
-  host: "nats"
-  port: 8086
-  db: "mainflux"
-

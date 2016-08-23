@@ -9,16 +9,12 @@ docker-compose up
 
 Otherwise, you can fetch all the images one by one and start the containers manually:
 ```bash
-# Influx prerequisite
-docker pull influxdb
-docker run --name influx -it influxdb
 # MongoDB prerequisite
 docker pull mongo
 docker run --name mongo -it mongo
 # Mainflux Lite
 docker pull mainflux/mainflux-lite
-docker run --name mainflux-lite -p 7070:7070 --link=mongo:mongo --link=influx:influx \
-        -it mainflux/mainflux-lite
+docker run --name mainflux-lite -p 7070:7070 --link=mongo:mongo -it mainflux/mainflux-lite
 ```
 
 Note that `mainflux-lite` container is linked

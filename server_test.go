@@ -33,9 +33,15 @@ func TestServer(t *testing.T) {
 
 	go mfl.ServeHTTP(cfg)
 
+	// prepare test framework
+	if ok := <-iris.Available; !ok {
+		t.Fatal("Unexpected error: server cannot start, please report this as bug!!")
+	}
+
+
 	e := iris.Tester(t)
-	r := e.Request("GET", "http://localhost:7070/status").Expect().JSON().Array()
-	fmt.Println(r)
+	r := e.Request("GET", "/status").Expect().Status(iris.StatusOK).JSON()
+	fmt.Println("%v", r)
 
 }
 

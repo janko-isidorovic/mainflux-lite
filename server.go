@@ -11,17 +11,16 @@ package main
 import (
 	"strconv"
 
-	"github.com/mainflux/mainflux-lite/config"
 	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/routes"
+	"github.com/mainflux/mainflux-lite/config"
 
 	"github.com/iris-contrib/middleware/logger"
 	"github.com/kataras/iris"
-
-	"github.com/fatih/color"
 )
 
-func main() {
+
+func (mfl *MainfluxLite) ServeHTTP(cfg config.Config) {
 	// Iris config
 	iris.Config.DisableBanner = true
 
@@ -40,15 +39,8 @@ func main() {
 	// register public API
 	registerRoutes()
 
-	// Parse config
-	var cfg config.Config
-	cfg.Parse()
-
 	// MongoDb
 	db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
-
-	color.Cyan(banner)
-	color.Cyan("Magic happens on port " + strconv.Itoa(cfg.HttpPort))
 
 	// start the server
 	iris.Listen(cfg.HttpHost + ":" + strconv.Itoa(cfg.HttpPort))
@@ -76,21 +68,3 @@ func registerRoutes() {
 
 	iris.Delete("/devices/:device_id/channels/:channel_id", routes.DeleteChannel)
 }
-
-var banner = `
-_|      _|            _|                _|_|  _|                      
-_|_|  _|_|    _|_|_|      _|_|_|      _|      _|  _|    _|  _|    _|  
-_|  _|  _|  _|    _|  _|  _|    _|  _|_|_|_|  _|  _|    _|    _|_|    
-_|      _|  _|    _|  _|  _|    _|    _|      _|  _|    _|  _|    _|  
-_|      _|    _|_|_|  _|  _|    _|    _|      _|    _|_|_|  _|    _|  
-                                                                     
-
-                == Industrial IoT System ==
-       
-                Made with <3 by Mainflux Team
-[w] http://mainflux.io
-[t] @mainflux
-
-                       ** LITE **
-
-`

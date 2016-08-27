@@ -6,12 +6,11 @@
  * See the included LICENSE file for more details.
  */
 
-package main
+package server
 
 import (
 	"strconv"
 
-	"github.com/mainflux/mainflux-lite/db"
 	"github.com/mainflux/mainflux-lite/routes"
 	"github.com/mainflux/mainflux-lite/config"
 
@@ -20,7 +19,7 @@ import (
 )
 
 
-func (mfl *MainfluxLite) ServeHTTP(cfg config.Config) {
+func ServeHTTP(cfg config.Config) {
 	// Iris config
 	iris.Config.DisableBanner = true
 
@@ -38,9 +37,6 @@ func (mfl *MainfluxLite) ServeHTTP(cfg config.Config) {
 
 	// register public API
 	registerRoutes()
-
-	// MongoDb
-	db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
 
 	// start the server
 	iris.Listen(cfg.HttpHost + ":" + strconv.Itoa(cfg.HttpPort))

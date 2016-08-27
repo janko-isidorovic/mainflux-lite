@@ -6,32 +6,26 @@
  * See the included LICENSE file for more details.
  */
 
-package main
+package server
 
 import (
 	"fmt"
 	"testing"
 	"github.com/mainflux/mainflux-lite/config"
-
+	"github.com/mainflux/mainflux-lite/db"
 	"github.com/kataras/iris"
 )
 
 func TestServer(t *testing.T) {
 
-	mfl := new(MainfluxLite)
-
 	// Config
-	cfg := config.Config{
-		HttpHost:"localhost",
-		HttpPort:7070,
+	var cfg config.Config
+	cfg.Parse()
 
-		// Mongo
-		MongoHost:"localhost",
-		MongoPort:27017,
-		MongoDatabase:"mainflux_test",
-	}
+	// MongoDb
+	db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
 
-	go mfl.ServeHTTP(cfg)
+	go ServeHTTP(cfg)
 
 	// prepare test framework
 	if ok := <-iris.Available; !ok {

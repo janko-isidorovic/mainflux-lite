@@ -43,5 +43,8 @@ tags
 # Go sources
 ./src
 
+# Go tests
+*.test
+
 # Binary
 mainflux-lite

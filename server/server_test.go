@@ -27,7 +27,7 @@ import (
 func TestMain(m *testing.M) {
 	// We are in testing - notify the program
 	// so that it is not confused if some other commad line 
-	// arguments com in - for example when test is started with `go test -v ./...`
+	// arguments come in - for example when test is started with `go test -v ./...`
 	// which is what Travis does
 	os.Setenv("TEST_ENV", "1")
 

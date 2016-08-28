@@ -42,6 +42,16 @@ func InitMongo(host string, port int, db string) error {
 	return err
 }
 
+func SetMainSession(s *mgo.Session) {
+	mainSession = s
+	mainSession.SetMode(mgo.Monotonic, true)
+}
+
+func SetMainDb(db string) {
+	mainDb = mainSession.DB(db)
+	DbName = db
+}
+
 func (this *MgoDb) Init() *mgo.Session {
 	this.Session = mainSession.Copy()
 	this.Db = this.Session.DB(DbName)

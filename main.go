@@ -32,6 +32,7 @@ func main() {
 	color.Cyan(banner)
 	color.Cyan("Magic happens on port " + strconv.Itoa(cfg.HttpPort))
 
+	// Serve forever
 	server.ServeHTTP(cfg)
 }
 

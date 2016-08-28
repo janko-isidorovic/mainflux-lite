@@ -23,7 +23,14 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+
 func TestMain(m *testing.M) {
+	// We are in testing - notify the program
+	// so that it is not confused if some other commad line 
+	// arguments com in - for example when test is started with `go test -v ./...`
+	// which is what Travis does
+	os.Setenv("TEST_ENV", "1")
+
 	var db *mgo.Session
 	c, err := dockertest.ConnectToMongoDB(15, time.Millisecond*500, func(url string) bool {
         // This callback function checks if the image's process is responsive.

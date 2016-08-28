@@ -30,6 +30,7 @@ type Config struct {
 	InfluxDatabase string
 }
 
+
 func (this *Config) Parse() {
 	/**
 	 * Config
@@ -37,8 +38,10 @@ func (this *Config) Parse() {
 	/** Viper setup */
 	viper.SetConfigType("yaml")   // or viper.SetConfigType("YAML")
 
-	if len(os.Args) > 1 {
-		// We provided config file as an argument
+	testEnv := os.Getenv("TEST_ENV")
+	if testEnv == "" && len(os.Args) > 1 {
+		// We are not in the TEST_ENV (where different args are provided)
+		// and provided config file as an argument
 		viper.SetConfigFile(os.Args[1])
 	} else {
 		// default cfg path to source dir, as we keep cfg.yml there

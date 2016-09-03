@@ -6,7 +6,7 @@
  * See the included LICENSE file for more details.
  */
 
-package server
+package servers
 
 import (
 	"strconv"
@@ -19,7 +19,7 @@ import (
 )
 
 
-func ServeHTTP(cfg config.Config) {
+func HttpServer(cfg config.Config) {
 	// Iris config
 	iris.Config.DisableBanner = true
 

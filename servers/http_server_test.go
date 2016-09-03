@@ -6,7 +6,7 @@
  * See the included LICENSE file for more details.
  */
 
-package server
+package servers
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func TestServer(t *testing.T) {
 	var cfg config.Config
 	cfg.Parse()
 
-	go ServeHTTP(cfg)
+	go HttpServer(cfg)
 
 	// prepare test framework
 	if ok := <-iris.Available; !ok {

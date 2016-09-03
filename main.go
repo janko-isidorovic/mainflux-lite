@@ -12,8 +12,10 @@ import (
 	"strconv"
 	"github.com/mainflux/mainflux-lite/config"
 	"github.com/mainflux/mainflux-lite/db"
-	"github.com/mainflux/mainflux-lite/server"
+	"github.com/mainflux/mainflux-lite/servers"
+	"github.com/mainflux/mainflux-lite/clients"
 	"github.com/fatih/color"
+	"runtime"
 )
 
 type MainfluxLite struct {
@@ -28,12 +30,20 @@ func main() {
 	// MongoDb
 	db.InitMongo(cfg.MongoHost, cfg.MongoPort, cfg.MongoDatabase)
 
+	// MQTT 
+	mqc := new(clients.MqttConn)
+	//Sub to everything comming on all channels of all devices
+	mqc.MqttSub()
+
+	// Serve HTTP
+	go servers.HttpServer(cfg)
+
 	// Print banner
 	color.Cyan(banner)
 	color.Cyan("Magic happens on port " + strconv.Itoa(cfg.HttpPort))
 
-	// Serve forever
-	server.ServeHTTP(cfg)
+	/** Keep main() runnig */
+	runtime.Goexit()
 }
 
 var banner = `

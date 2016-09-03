@@ -24,6 +24,11 @@ import (
 	"github.com/krylovsk/gosenml"
 )
 
+type ChannelWriteStatus struct {
+	Nb int
+	Str string
+}
+
 /** == Functions == */
 
 /**
@@ -113,46 +118,45 @@ func GetChannel(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, &result)
 }
 
+
 /**
- * UpdateChannel()
+ * WriteChannel()
+ * Generic function that updates the channel value.
+ * Can be called via various protocols
  */
-func UpdateChannel(ctx *iris.Context) {
+func WriteChannel(id string, bodyBytes []byte) ChannelWriteStatus {
 	var body map[string]interface{}
-	ctx.ReadJSON(&body)
-	// Validate JSON schema user provided
-	/*
-	if validateJsonSchema("channel", body) != true {
-		println("Invalid schema")
-		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
-		return
+	if err := json.Unmarshal(bodyBytes, &body); err != nil {
+		fmt.Println("Error unmarshaling body")
 	}
-	*/
 
 	Db := db.MgoDb{}
 	Db.Init()
 	defer Db.Close()
 
-	id := ctx.Param("channel_id")
-
 	// Check if someone is trying to change "id" key
 	// and protect us from this
+	s := ChannelWriteStatus{}
 	if _, ok := body["id"]; ok {
-		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'id' is read-only"})
-		return
+		s.Nb = iris.StatusBadRequest
+		s.Str = "Invalid request: 'id' is read-only"
+		return s
 	}
 	if _, ok := body["device"]; ok {
 		println("Error: can not change device")
-		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'device' is read-only"})
-		return
+		s.Nb = iris.StatusBadRequest
+		s.Str = "Invalid request: 'device' is read-only"
+		return s
 	}
 	if _, ok := body["created"]; ok {
 		println("Error: can not change device")
-		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid request: 'created' is read-only"})
-		return
+		s.Nb = iris.StatusBadRequest
+		s.Str = "Invalid request: 'created' is read-only"
+		return s
 	}
 
 	senmlDecoder := gosenml.NewJSONDecoder()
-	m, _ := senmlDecoder.DecodeMessage(ctx.RequestCtx.Request.Body())
+	m, _ := senmlDecoder.DecodeMessage(bodyBytes)
 	for _, e := range m.Entries {
 		// BaseName
 		e.Name = m.BaseName + e.Name
@@ -174,8 +178,9 @@ func UpdateChannel(ctx *iris.Context) {
 		err := Db.C("channels").Update(colQuerier, change)
 		if err != nil {
 			log.Print(err)
-			ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not inserted", "id": id})
-			return
+			s.Nb = iris.StatusNotFound
+			s.Str = "Not inserted"
+			return s
 		}
 	}
 
@@ -189,11 +194,36 @@ func UpdateChannel(ctx *iris.Context) {
 	err := Db.C("channels").Update(colQuerier, change)
 	if err != nil {
 		log.Print(err)
-		ctx.JSON(iris.StatusNotFound, iris.Map{"response": "not updated", "id": id})
-		return
+		s.Nb = iris.StatusNotFound
+		s.Str = "Not updated"
+		return s
 	}
 
-	ctx.JSON(iris.StatusOK, iris.Map{"response": "updated", "id": id})
+	s.Nb = iris.StatusOK
+	s.Str = "Updated"
+	return s
+}
+
+
+/**
+ * UpdateChannel()
+ */
+func UpdateChannel(ctx *iris.Context) {
+	var body map[string]interface{}
+	ctx.ReadJSON(&body)
+	// Validate JSON schema user provided
+	/*
+	if validateJsonSchema("channel", body) != true {
+		println("Invalid schema")
+		ctx.JSON(iris.StatusBadRequest, iris.Map{"response": "invalid json schema in request"})
+		return
+	}
+	*/
+
+	id := ctx.Param("channel_id")
+
+	status := WriteChannel(id, ctx.RequestCtx.Request.Body())
+	ctx.JSON(status.Nb, iris.Map{"response": status.Str})
 }
 
 /**
